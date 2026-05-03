@@ -1964,9 +1964,9 @@ if not args.dry_run:
         pass
 
     # Write three separate workbooks: Routes, Dependencies, Logs/Diagnostics
-    routes_file = f'/home/asghar_attari1211/RnD/Routes_{output_date}.xlsx'
-    deps_file = f'/home/asghar_attari1211/RnD/Dependencies_{output_date}.xlsx'
-    logs_file = f'/home/asghar_attari1211/RnD/Logs_Discrepancies_{output_date}.xlsx'
+    routes_file = f'/home/asghar_attari1211/RnD/Routes.xlsx'
+    deps_file = f'/home/asghar_attari1211/RnD/Dependencies.xlsx'
+    logs_file = f'/home/asghar_attari1211/RnD/Logs_Discrepancies.xlsx'
     try:
         # Stream-write Final Routes using openpyxl write-only mode to reduce memory pressure
         try:
@@ -2131,5 +2131,4 @@ if not args.no_map:
     except Exception:
         pass
 
-# Map generation disabled per request (not needed at the moment)
-print_progress('ℹ️ Map generation disabled for this run', args.verbose)
+print_progress('✅ Data processed. You can now launch the Network Explorer App.', args.verbose)
