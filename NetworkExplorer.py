@@ -131,8 +131,10 @@ if main_menu == "Search (Site/OFN)":
     search_cat = st.sidebar.selectbox("Sub-menu", ["Site", "OFN"])
     
     if search_cat == "Site":
-        target_sites_input = st.sidebar.text_area("Site IDs", height=100, help="Multiple Site with Comma Separation").upper()
-        st.sidebar.caption("Multiple Site with Comma Separation")
+        with st.sidebar.form("search_site_form"):
+            target_sites_input = st.text_area("Site IDs", height=100, help="Multiple Site with Comma Separation").upper()
+            st.caption("Multiple Site with Comma Separation")
+            submit_search = st.form_submit_button("Search")
         
         st.sidebar.markdown("---")
         st.sidebar.subheader("Details")
@@ -220,7 +222,9 @@ else: # View Mode
     show_route = st.sidebar.checkbox("Route View", value=True)
     show_dep = st.sidebar.checkbox("Dependency View")
     
-    target_v_input = st.sidebar.text_area("Enter Site IDs (comma-separated)", height=100).upper()
+    with st.sidebar.form("view_mode_form"):
+        target_v_input = st.text_area("Enter Site IDs (comma-separated)", height=100).upper()
+        submit_view = st.form_submit_button("Search")
     
     service_layers = []
     if show_route:
