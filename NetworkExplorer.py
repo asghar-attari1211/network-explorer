@@ -6,13 +6,18 @@ import os
 import re
 
 # --- Configuration ---
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = "."
 
-def get_latest_file(pattern):
-    files = [f for f in os.listdir(BASE_DIR) if re.search(pattern, f) and f.endswith('.xlsx')]
-    if not files: return None
-    files.sort(key=lambda x: os.path.getmtime(os.path.join(BASE_DIR, x)), reverse=True)
-    return os.path.join(BASE_DIR, files[0])
+def get_latest_file(pattern, directory=BASE_DIR):
+    if not os.path.exists(directory):
+        return None
+    try:
+        files = [f for f in os.listdir(directory) if re.search(pattern, f) and f.endswith('.xlsx')]
+        if not files: return None
+        files.sort(key=lambda x: os.path.getmtime(os.path.join(directory, x)), reverse=True)
+        return os.path.join(directory, files[0])
+    except Exception:
+        return None
 
 ROUTES_FILE = os.path.join(BASE_DIR, "Routes.xlsx")
 DEPS_FILE = os.path.join(BASE_DIR, "Dependencies.xlsx")
