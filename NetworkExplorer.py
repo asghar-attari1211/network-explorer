@@ -6,7 +6,7 @@ import os
 import re
 
 # --- Configuration ---
-BASE_DIR = "."
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def get_latest_file(pattern, directory=BASE_DIR):
     if not os.path.exists(directory):
