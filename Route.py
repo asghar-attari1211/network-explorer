@@ -21,7 +21,7 @@ parser.add_argument('--no-map', action='store_true', help='Skip generating HTML 
 args = parser.parse_args()
 
 DEBUG_SITE = args.debug_site.strip().upper() if args.debug_site else ''
-FILE_PATH = "/workspaces/RnD/VLAN List -- AI Seekho -- Sample.xlsx"
+FILE_PATH = "/home/asghar_attari1211/RnD/VLAN List -- AI Seekho -- Sample.xlsx"
 SITE_PATTERN = re.compile(r'([A-Z]{2,10}\d{1,6})')
 
 
@@ -33,7 +33,7 @@ def extract_sites(text):
 
 
 # Consolidate VLAN Reports
-vlan_reports_folder = "/workspaces/RnD/VLAN List Reports"
+vlan_reports_folder = "/home/asghar_attari1211/RnD/VLAN List Reports"
 consolidated_dfs = []
 skipped_files = []
 
@@ -158,7 +158,7 @@ if consolidated_dfs:
             consolidated_date = output_date
     except Exception:
         consolidated_date = output_date
-    consolidated_output = f'/workspaces/RnD/Consolidated_VLAN_Report_{consolidated_date}.xlsx'
+    consolidated_output = f'/home/asghar_attari1211/RnD/Consolidated_VLAN_Report_{consolidated_date}.xlsx'
 
 def parse_service(text):
     if '_2G' in text or ' RAN_2G' in text or '2G' in text:
@@ -1866,10 +1866,10 @@ cols = ['Site ID', 'Service', 'VLAN', 'Site Role', 'Tail-HUB Status', 'Site Type
 df_library_state = pd.DataFrame(library_state)
 df_logic = pd.DataFrame(logic_verification)
 
-output_name = f'/workspaces/RnD/Output_DeepTrace_{output_date}.xlsx'
-map_name = f'/workspaces/RnD/Site_Map_{output_date}.html'
+output_name = f'/home/asghar_attari1211/RnD/Output_DeepTrace_{output_date}.xlsx'
+map_name = f'/home/asghar_attari1211/RnD/Site_Map_{output_date}.html'
 if args.dry_run or args.sample_sites > 0 or args.sample_rows > 0 or args.filter_sites:
-    output_name = f'/workspaces/RnD/Output_DryRun_{output_date}.xlsx'
+    output_name = f'/home/asghar_attari1211/RnD/Output_DryRun_{output_date}.xlsx'
     print_progress('ℹ️ Dry-run or sample mode: writing to separate verification file', args.verbose)
 
 if not args.dry_run:
@@ -1964,9 +1964,9 @@ if not args.dry_run:
         pass
 
     # Write three separate workbooks: Routes, Dependencies, Logs/Diagnostics
-    routes_file = f'/workspaces/RnD/Routes_{output_date}.xlsx'
-    deps_file = f'/workspaces/RnD/Dependencies_{output_date}.xlsx'
-    logs_file = f'/workspaces/RnD/Logs_Discrepancies_{output_date}.xlsx'
+    routes_file = f'/home/asghar_attari1211/RnD/Routes_{output_date}.xlsx'
+    deps_file = f'/home/asghar_attari1211/RnD/Dependencies_{output_date}.xlsx'
+    logs_file = f'/home/asghar_attari1211/RnD/Logs_Discrepancies_{output_date}.xlsx'
     try:
         # Stream-write Final Routes using openpyxl write-only mode to reduce memory pressure
         try:
