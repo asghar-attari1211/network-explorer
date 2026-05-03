@@ -6,7 +6,7 @@ import os
 import re
 
 # --- Configuration ---
-BASE_DIR = "/home/asghar_attari1211/RnD"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def get_latest_file(pattern):
     files = [f for f in os.listdir(BASE_DIR) if re.search(pattern, f) and f.endswith('.xlsx')]
