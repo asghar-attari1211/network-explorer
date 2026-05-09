@@ -23,7 +23,7 @@ args = parser.parse_args()
 DEBUG_SITE = args.debug_site.strip().upper() if args.debug_site else ''
 BASE_DIR = "."
 FILE_PATH = os.path.join(BASE_DIR, "VLAN List -- AI Seekho -- Sample.xlsx")
-SITE_PATTERN = re.compile(r'([A-Z]{2,10}\d{1,6})')
+SITE_PATTERN = re.compile(r'([A-Z]{2,10}\d{1,6}|[A-Z]{2}\d[A-Z]\d{2,})')
 
 
 def extract_sites(text):
@@ -67,10 +67,12 @@ for file_name in os.listdir(vlan_reports_folder):
                 break
         if not vlan_sheet:
             vlan_sheet = sheet_names[0]
-        # Try header=0 then header=1
-        df = pd.read_excel(file_path, sheet_name=vlan_sheet, header=0)
-        if 'NE NAME' not in df.columns or 'VLAN ID' not in df.columns:
+        # check if 2nd column in 1st row is blank then fetch column headers from Row 2 else Row 1
+        temp_df = pd.read_excel(file_path, sheet_name=vlan_sheet, header=None, nrows=2)
+        if temp_df.shape[1] > 1 and pd.isna(temp_df.iloc[0, 1]):
             df = pd.read_excel(file_path, sheet_name=vlan_sheet, header=1)
+        else:
+            df = pd.read_excel(file_path, sheet_name=vlan_sheet, header=0)
         if not df.empty:
             # enforce DATE from filename
             df['DATE'] = pd.to_datetime(file_date).strftime('%d-%b-%Y')

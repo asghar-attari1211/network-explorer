@@ -131,17 +131,20 @@ if main_menu == "Search (Site/OFN)":
     search_cat = st.sidebar.selectbox("Sub-menu", ["Site", "OFN"])
     
     if search_cat == "Site":
+        all_sites_list = sorted(list(coords.keys()))
+        search_term = st.sidebar.text_input("Filter Sites (e.g., ROM)")
+        filtered_sites = [s for s in all_sites_list if search_term.upper() in s.upper()] if search_term else []
+        select_all = st.sidebar.checkbox("Select All Filtered Sites", value=bool(search_term))
+        default_sites = filtered_sites if select_all else []
+        
         with st.sidebar.form("search_site_form"):
-            target_sites_input = st.text_area("Site IDs", height=100, help="Multiple Site with Comma Separation").upper()
-            st.caption("Multiple Site with Comma Separation")
+            target_sites = st.multiselect("Select Site IDs", options=all_sites_list, default=default_sites)
             submit_search = st.form_submit_button("Search")
         
         st.sidebar.markdown("---")
         st.sidebar.subheader("Details")
         
-        if target_sites_input:
-            target_sites = [s.strip() for s in target_sites_input.split(',') if s.strip()]
-            
+        if target_sites:
             all_site_routes = []
             all_deps = []
             
@@ -196,34 +199,49 @@ if main_menu == "Search (Site/OFN)":
                 st.sidebar.info("No dependency information available for selected site(s).")
 
     elif search_cat == "OFN":
-        target_ofn = st.sidebar.selectbox("OFN ID", options=[""] + sorted(list(ofn_set)))
+        all_ofn_list = sorted(list(ofn_set))
+        search_term_ofn = st.sidebar.text_input("Filter OFN IDs")
+        filtered_ofn = [s for s in all_ofn_list if search_term_ofn.upper() in s.upper()] if search_term_ofn else []
+        select_all_ofn = st.sidebar.checkbox("Select All Filtered OFNs", value=bool(search_term_ofn))
+        default_ofns = filtered_ofn if select_all_ofn else []
+        
+        with st.sidebar.form("search_ofn_form"):
+            target_ofns = st.multiselect("Select OFN IDs", options=all_ofn_list, default=default_ofns)
+            submit_search_ofn = st.form_submit_button("Search")
         
         st.sidebar.markdown("---")
         st.sidebar.subheader("Details")
         
-        if target_ofn and not routes_df.empty:
-            dependent_sites_on_ofn = routes_df[routes_df['Drop Node'] == target_ofn]['Site ID'].unique()
-            for site_id in dependent_sites_on_ofn:
-                sites_to_highlight[site_id] = {'is_route': False, 'is_dep': True, 'show_label': True}
-            
-            if target_ofn in coords:
-                sites_to_highlight[target_ofn] = {'is_route': True, 'is_dep': False, 'show_label': True}
-                center_loc = coords[target_ofn]
-                zoom_lvl = 12
-            
-            st.sidebar.subheader(f"Sites Dependent on OFN: {target_ofn}")
-            if len(dependent_sites_on_ofn) > 0:
-                st.sidebar.write(f"The following sites drop to {target_ofn}:")
-                st.sidebar.dataframe(pd.DataFrame(dependent_sites_on_ofn, columns=['Site ID']), use_container_width=True)
-            else:
-                st.sidebar.info(f"No sites found dependent on OFN {target_ofn}.")
+        if target_ofns and not routes_df.empty:
+            for target_ofn in target_ofns:
+                dependent_sites_on_ofn = routes_df[routes_df['Drop Node'] == target_ofn]['Site ID'].unique()
+                for site_id in dependent_sites_on_ofn:
+                    sites_to_highlight[site_id] = {'is_route': False, 'is_dep': True, 'show_label': True}
+                
+                if target_ofn in coords:
+                    sites_to_highlight[target_ofn] = {'is_route': True, 'is_dep': False, 'show_label': True}
+                    center_loc = coords[target_ofn]
+                    zoom_lvl = 12
+                
+                st.sidebar.subheader(f"Sites Dependent on OFN: {target_ofn}")
+                if len(dependent_sites_on_ofn) > 0:
+                    st.sidebar.write(f"The following sites drop to {target_ofn}:")
+                    st.sidebar.dataframe(pd.DataFrame(dependent_sites_on_ofn, columns=['Site ID']), use_container_width=True)
+                else:
+                    st.sidebar.info(f"No sites found dependent on OFN {target_ofn}.")
 
 else: # View Mode
     show_route = st.sidebar.checkbox("Route View", value=True)
     show_dep = st.sidebar.checkbox("Dependency View")
     
+    all_sites_list = sorted(list(coords.keys()))
+    search_term_view = st.sidebar.text_input("Filter Sites (e.g., ROM)", key="view_filter")
+    filtered_sites_view = [s for s in all_sites_list if search_term_view.upper() in s.upper()] if search_term_view else []
+    select_all_view = st.sidebar.checkbox("Select All Filtered Sites", value=bool(search_term_view), key="view_select_all")
+    default_sites_view = filtered_sites_view if select_all_view else []
+
     with st.sidebar.form("view_mode_form"):
-        target_v_input = st.text_area("Enter Site IDs (comma-separated)", height=100).upper()
+        target_vs = st.multiselect("Select Site IDs", options=all_sites_list, default=default_sites_view, key="view_target_vs")
         submit_view = st.form_submit_button("Search")
     
     service_layers = []
@@ -238,8 +256,7 @@ else: # View Mode
     st.sidebar.markdown("---")
     st.sidebar.subheader("Details")
 
-    if target_v_input:
-        target_vs = [s.strip() for s in target_v_input.split(',') if s.strip()]
+    if target_vs:
         
         all_routes_view = []
         all_deps_view = []
@@ -289,19 +306,26 @@ else: # View Mode
                             temp_dep = deps_for_site[['Site Name', 'Dependent Sites']].copy()
                             temp_dep['Source'] = sheet_name
                             all_deps_view.append(temp_dep)
+                            
+                            # Get all dependent sites including the target itself
+                            dependent_sites_list = [target_v] + deps_for_site['Dependent Sites'].dropna().astype(str).str.upper().tolist()
+                            
                             # Mark dependent sites for highlighting and labeling
-                            for _, r_dep in deps_for_site.iterrows():
-                                dep_site = str(r_dep['Dependent Sites']).upper()
-                                if dep_site in coords:
+                            for dep_site in dependent_sites_list:
+                                if dep_site != target_v and dep_site in coords:
                                     sites_to_highlight[dep_site] = sites_to_highlight.get(dep_site, {'is_route': False, 'is_dep': False, 'show_label': False})
                                     sites_to_highlight[dep_site]['is_dep'] = True
                                     sites_to_highlight[dep_site]['show_label'] = True 
                                     
-                                    # Also highlight the link from target_v to dep_site if it exists in LR
-                                    if target_v in coords and dep_site in coords:
-                                        if ((lr_df['Site name S1'].str.upper() == target_v) & (lr_df['Site name S2'].str.upper() == dep_site)).any() or \
-                                           ((lr_df['Site name S1'].str.upper() == dep_site) & (lr_df['Site name S2'].str.upper() == target_v)).any():
-                                            links_to_highlight.add((target_v, dep_site, 'DEP'))
+                            # Mod A-B matching for all dependent sites with each other
+                            for i in range(len(dependent_sites_list)):
+                                for j in range(i + 1, len(dependent_sites_list)):
+                                    s1 = dependent_sites_list[i]
+                                    s2 = dependent_sites_list[j]
+                                    if s1 in coords and s2 in coords:
+                                        if ((lr_df['Site name S1'].str.upper() == s1) & (lr_df['Site name S2'].str.upper() == s2)).any() or \
+                                           ((lr_df['Site name S1'].str.upper() == s2) & (lr_df['Site name S2'].str.upper() == s1)).any():
+                                            links_to_highlight.add((s1, s2, 'DEP'))
 
         if show_route and service_layers:
             if all_routes_view:
@@ -354,12 +378,12 @@ def add_site_marker(map_obj, site_id, site_type, is_highlighted_route=False, is_
         border_weight = 2
         fill_color = "blue"
     elif site_type == 'FTTT':
-        icon_color = "pink"
+        icon_color = "deeppink"
         icon_shape = "circle"
         icon_html = f'<i class="fa fa-flag" style="color:{icon_color};"></i>'
         radius = 8
         border_weight = 2
-        fill_color = "pink"
+        fill_color = "deeppink"
     elif site_type == 'VSAT':
         icon_color = "black"
         icon_shape = "circle"
@@ -465,7 +489,7 @@ for site_id in all_unique_sites_on_map:
         add_site_marker(m, site_id, get_site_type(site_id), 
                         is_highlighted_route=False, 
                         is_highlighted_dependency=False, 
-                        show_label=False,
+                        show_label=True,
                         is_background_site=True)
         drawn += 1
         if drawn >= 1000: break
@@ -476,6 +500,37 @@ for s1, s2, link_type in links_to_highlight:
         if link_type == 'DEP': color = "purple"
         elif link_type == 'LR': color = "green"
         folium.PolyLine([coords[s1], coords[s2]], color=color, weight=5, opacity=0.8).add_to(m)
+
+from branca.element import Template, MacroElement
+
+template = """
+{% macro html(this, kwargs) %}
+<div style="
+    position: fixed; 
+    bottom: 50px;
+    left: 50px;
+    width: 150px;
+    height: 160px;
+    border:2px solid grey;
+    z-index:9999;
+    font-size:14px;
+    background-color:white;
+    opacity: 0.9;
+    padding: 10px;
+    ">
+    <b>Network Legend</b><br>
+    <span style="color:blue;">&#9650;</span> OFN<br>
+    <span style="color:deeppink;">&#9873;</span> FTTT<br>
+    <span style="color:black;">&#128225;</span> VSAT<br>
+    <span style="color:gray;">&#9679;</span> MW<br>
+    <span style="color:red;">&mdash;</span> Route Link<br>
+    <span style="color:purple;">&mdash;</span> Dep Link<br>
+</div>
+{% endmacro %}
+"""
+macro = MacroElement()
+macro._template = Template(template)
+m.get_root().add_child(macro)
 
 st.title("Interactive Network Map")
 st_folium(m, width="100%", height=700)
