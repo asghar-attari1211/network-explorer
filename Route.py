@@ -23,7 +23,7 @@ args = parser.parse_args()
 DEBUG_SITE = args.debug_site.strip().upper() if args.debug_site else ''
 BASE_DIR = "."
 FILE_PATH = os.path.join(BASE_DIR, "VLAN List -- AI Seekho -- Sample.xlsx")
-SITE_PATTERN = re.compile(r'([A-Z]{2,10}\d{1,6}|[A-Z]{2}\d[A-Z]\d{2,})')
+SITE_PATTERN = re.compile(r'([A-Z]{2}\d[A-Z]\d{2,}|[A-Z]{2,10}\d{1,6})')
 
 
 def extract_sites(text):
