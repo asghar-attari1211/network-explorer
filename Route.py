@@ -2111,7 +2111,7 @@ try:
             if 'NE NAME' in df_consolidated_mod.columns:
                 df_consolidated_mod['Far End'] = df_consolidated_mod['NE NAME'].apply(lambda x: extract_sites(x)[0] if extract_sites(x) else '')
             else:
-                df_consolidated_mod['Far End'] = ''com
+                df_consolidated_mod['Far End'] = ''
             df_consolidated_mod['Mod A-B'] = df_consolidated_mod['Near End'].astype(str) + ' - ' + df_consolidated_mod['Far End'].astype(str)
             try:
                 df_consolidated_mod.to_excel(consolidated_output, index=False)
