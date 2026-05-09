@@ -245,7 +245,7 @@ else: # View Mode
         submit_view = st.form_submit_button("Search")
     
     service_layers = []
-    if show_route:
+    if show_route or show_dep:
         st.sidebar.write("Service Layers:")
         col1, col2 = st.sidebar.columns(2)
         if col1.checkbox("2G", value=True): service_layers.append("2G")
@@ -298,8 +298,10 @@ else: # View Mode
                                 for j in range(len(path)-1):
                                     links_to_highlight.add((path[j], path[j+1], svc))
 
-            if show_dep and deps_data:
+            if show_dep and deps_data and service_layers:
                 for sheet_name, df_dep in deps_data.items():
+                    if not any(svc in sheet_name for svc in service_layers):
+                        continue
                     if not df_dep.empty and 'Site Name' in df_dep.columns and 'Dependent Sites' in df_dep.columns:
                         deps_for_site = df_dep[df_dep['Site Name'] == target_v]
                         if not deps_for_site.empty:
